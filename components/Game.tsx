@@ -133,7 +133,6 @@ const Game = () => {
 
           const font = { fontFamily: '"Orbitron"', fontSize: '42px', color: '#fff', fontStyle: 'bold' };
           
-          // DÜZELTME 1: Renk ve Blur yer değiştirdi
           this.levelText = this.add.text(20, 50, `LEVEL 1`, font).setShadow(0, 0, '#0052ff', 10);
           
           this.pinsLeftText = this.add.text(20, 100, `PINS: 0`, { ...font, fontSize: '24px' }).setAlpha(0.8);
@@ -302,12 +301,13 @@ const Game = () => {
         restartGame() { this.startLevel(1); }
       }
 
+      // --- DÜZELTME 2: Gravity'ye X ekseni eklendi ---
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO, 
         parent: 'game-container', 
         transparent: true,
         scale: { mode: Phaser.Scale.RESIZE, width: '100%', height: '100%' },
-        physics: { default: 'arcade', arcade: { gravity: { y: 0 } } },
+        physics: { default: 'arcade', arcade: { gravity: { x: 0, y: 0 } } },
         scene: GameScene
       };
       
