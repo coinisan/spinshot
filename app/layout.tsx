@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next"; // Viewport eklendi
+import type { Metadata, Viewport } from "next";
 import { Orbitron } from "next/font/google";
 import "./globals.css";
 
@@ -7,15 +7,19 @@ const orbitron = Orbitron({ subsets: ["latin"], weight: ["400", "700"] });
 export const metadata: Metadata = {
   title: "Spinshot",
   description: "The addictive neon arcade game on Farcaster.",
-  manifest: "/manifest.json", // İleride PWA olursa diye
+  manifest: "/manifest.json",
+  // 👇 LOGO AYARLARI BURADA
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png', // iPhone ana ekrana eklenirse bu görünür
+  },
 };
 
-// MOBİL İÇİN KRİTİK AYARLAR
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  userScalable: false, // Kullanıcı zoom yapamasın
+  userScalable: false,
   themeColor: "#000000",
 };
 

@@ -14,13 +14,16 @@ export async function GET() {
       "version": "1",
       "name": "Spinshot",
       "slug": "spinshot",
-      "iconUrl": `${appUrl}/icon.png`,
-      "homeUrl": appUrl,
       "description": "Addictive neon arcade game on Base. Hit the target!",
       "primaryCategory": "games",
       "tags": ["game", "arcade", "skill"],
-      "splashImageUrl": `${appUrl}/icon.png`,
-      "splashBackgroundColor": "#000000"
+      
+      // 👇 İKONLARI GÜNCELLEDİK
+      "iconUrl": `${appUrl}/logo.png`,
+      "splashImageUrl": `${appUrl}/logo.png`,
+      "splashBackgroundColor": "#000000",
+      
+      "homeUrl": appUrl
     }
   };
 
