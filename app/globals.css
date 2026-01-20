@@ -1,26 +1,46 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  background: #000000;
+  color: white;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Kaydırmayı kapat */
+  background: url('/arkpln.png') no-repeat center center fixed;
+  background-size: cover;
+  
+  /* MOBİL SİHİRLERİ */
+  touch-action: none; /* Kaydırma, zoom vb. tüm tarayıcı hareketlerini iptal et */
+  -webkit-touch-callout: none; /* iOS'ta uzun basınca çıkan menüyü kapat */
+  -webkit-user-select: none; /* Metin seçimini kapat */
+  user-select: none;
+  overscroll-behavior: none; /* Pull-to-refresh'i kapat (Çok Önemli!) */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+#game-container {
+  width: 100vw;
+  height: 100vh; /* iOS Safari'de adres çubuğu sorununu çözmek için dvh kullanılabilir ama şimdilik vh yeterli */
+  display: block;
+  overflow: hidden;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+canvas {
+  display: block;
+  outline: none;
+  /* Dokunma vurgusunu kaldır (Mavi yanıp sönmeyi engeller) */
+  -webkit-tap-highlight-color: transparent; 
+}
+
+/* Input kutusu hariç her yerde seçimi kapat */
+input {
+  -webkit-user-select: text;
+  user-select: text;
+  touch-action: manipulation; /* Klavye açılınca zoom yapmasını engeller */
 }
