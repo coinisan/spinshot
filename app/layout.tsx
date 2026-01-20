@@ -8,10 +8,10 @@ export const metadata: Metadata = {
   title: "Spinshot",
   description: "The addictive neon arcade game on Farcaster.",
   manifest: "/manifest.json",
-  // 👇 LOGO AYARLARI BURADA
+  // 👇 İKONLARI GÜNCELLEDİK
   icons: {
-    icon: '/logo.png',
-    apple: '/logo.png', // iPhone ana ekrana eklenirse bu görünür
+    icon: '/logox.png',   // Yeni logonun adı
+    apple: '/logox.png',  // iPhone ana ekran ikonu için de aynısı
   },
 };
 
