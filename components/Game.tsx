@@ -53,11 +53,9 @@ const Game = () => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    // High Score Yükle
     const saved = localStorage.getItem("spinshot_highscore");
     if (saved) setHighScore(parseInt(saved));
     
-    // SDK Init
     const initSDK = async () => {
        try { if (sdk?.actions?.ready) sdk.actions.ready(); } catch (e) { console.error(e); }
     };
@@ -121,14 +119,11 @@ const Game = () => {
         preload() {
           this.load.image('baseTarget', '/base.jpg');
           
-          // DÜZELTİLEN SATIR BURASI: add:false silindi
           let g = this.make.graphics({ x: 0, y: 0 });
           
-          // İğne
           g.fillStyle(0xffffff); g.fillRect(6, 16, 4, 140); g.fillCircle(8, 8, 8);
           g.generateTexture('pinTexture', 16, 156);
           
-          // Partikül
           g.clear(); g.fillStyle(0xffffff); g.fillRect(0,0,4,4); g.generateTexture('particleTexture', 4,4);
         }
 
@@ -137,7 +132,10 @@ const Game = () => {
           this.cameras.main.setBackgroundColor(0x00000000);
 
           const font = { fontFamily: '"Orbitron"', fontSize: '42px', color: '#fff', fontStyle: 'bold' };
-          this.levelText = this.add.text(20, 50, `LEVEL 1`, font).setShadow(0,0,10, '#0052ff');
+          
+          // DÜZELTME 1: Renk ve Blur yer değiştirdi
+          this.levelText = this.add.text(20, 50, `LEVEL 1`, font).setShadow(0, 0, '#0052ff', 10);
+          
           this.pinsLeftText = this.add.text(20, 100, `PINS: 0`, { ...font, fontSize: '24px' }).setAlpha(0.8);
 
           const targetY = height * 0.30;
