@@ -66,7 +66,6 @@ const Game = () => {
 
   const fetchLeaderboard = async () => {
     try {
-      // Şimdilik mock data, ileride API'ye bağlanabilir
       const res = await fetch('/api/leaderboard');
       if(res.ok) {
         const data = await res.json();
@@ -82,7 +81,7 @@ const Game = () => {
       await fetch('/api/leaderboard', {
         method: 'POST', body: JSON.stringify({ name: playerName, score: score })
       });
-      fetchLeaderboard(); // Listeyi güncelle
+      fetchLeaderboard(); 
     } catch (e) { console.error(e); }
     setSubmitting(false);
   };
@@ -90,16 +89,13 @@ const Game = () => {
   const startGame = () => {
     setGameState('PLAYING');
     setScore(0);
-    // Eğer oyun zaten varsa sahneyi yeniden başlat
     if (gameRef.current) {
       const scene = gameRef.current.scene.getScene('GameScene') as any;
       if (scene) scene.restartGame();
     }
   };
 
-  // Oyun Başlatma Hook'u
   useEffect(() => {
-    // Sadece PLAYING modundaysak ve oyun henüz yüklenmediyse yükle
     if (gameState === 'PLAYING' && typeof window !== "undefined" && !gameRef.current) {
       
       soundManager.init();
@@ -125,8 +121,8 @@ const Game = () => {
         preload() {
           this.load.image('baseTarget', '/base.jpg');
           
-          // Grafik Texture Oluşturma
-          let g = this.make.graphics({ x: 0, y: 0, add: false });
+          // DÜZELTİLEN SATIR BURASI: add:false silindi
+          let g = this.make.graphics({ x: 0, y: 0 });
           
           // İğne
           g.fillStyle(0xffffff); g.fillRect(6, 16, 4, 140); g.fillCircle(8, 8, 8);
@@ -140,33 +136,27 @@ const Game = () => {
           const { width, height } = this.scale;
           this.cameras.main.setBackgroundColor(0x00000000);
 
-          // UI
           const font = { fontFamily: '"Orbitron"', fontSize: '42px', color: '#fff', fontStyle: 'bold' };
           this.levelText = this.add.text(20, 50, `LEVEL 1`, font).setShadow(0,0,10, '#0052ff');
           this.pinsLeftText = this.add.text(20, 100, `PINS: 0`, { ...font, fontSize: '24px' }).setAlpha(0.8);
 
-          // Hedef Container
           const targetY = height * 0.30;
           this.targetContainer = this.add.container(width/2, targetY);
           
-          // Hedef Daire (Base Logosu)
           this.targetCircle = this.add.sprite(0,0,'baseTarget');
           const targetSize = Math.min(width * 0.45, 180); 
           this.targetCircle.setDisplaySize(targetSize, targetSize);
           
-          // Maskeleme (Yuvarlak yapma)
           const maskShape = this.make.graphics().fillCircle(width/2, targetY, targetSize/2).createGeometryMask();
           this.targetCircle.setMask(maskShape);
           this.targetCircle.postFX.addGlow(0x0052ff, 4, 0, false, 0.1, 10);
           
           this.targetContainer.add(this.targetCircle);
 
-          // Aktif İğne
           const spawnY = height * 0.85; 
           this.activePin = this.physics.add.sprite(width/2, spawnY, 'pinTexture').setTint(0xff00ff);
           this.activePin.postFX.addGlow(0xff00ff, 4, 0, false, 0.1, 10);
 
-          // Partiküller
           this.particleEmitter = this.add.particles(0,0,'particleTexture', {
              lifespan: 600, speed: {min:100, max:300}, scale: {start:1, end:0}, blendMode: 'ADD', emitting: false
           });
@@ -182,16 +172,13 @@ const Game = () => {
           this.isGameOver = false;
           this.canShoot = true;
           
-          // Önceki animasyonları durdur (BUG FIX)
           this.tweens.killTweensOf(this.targetContainer);
-          this.targetContainer.setScale(0); // Başlangıçta gizle
+          this.targetContainer.setScale(0); 
           this.targetContainer.setRotation(0);
           
           this.attachedPins = [];
-          // Eski iğneleri temizle
           this.targetContainer.each((c:any) => { if(c !== this.targetCircle) c.destroy(); });
           
-          // Hız ayarı
           const speed = 1.5 + ((lvl-1)*0.3);
           this.rotationDirection = Math.random() > 0.5 ? 1 : -1;
           this.currentRotationSpeed = speed * this.rotationDirection;
@@ -202,7 +189,6 @@ const Game = () => {
           
           setScore(this.level);
 
-          // Level Başlama Animasyonu (Büyüme)
           this.tweens.add({
             targets: this.targetContainer,
             scale: 1,
@@ -236,12 +222,9 @@ const Game = () => {
         update(t:number, d:number) {
           if (this.isGameOver) return;
           
-          // Hedefi Döndür
           this.targetContainer.rotation += this.currentRotationSpeed * (d/1000);
           
-          // Çarpışma Kontrolü
           const targetRadius = this.targetCircle.displayWidth / 2;
-          // İğne hedefe yaklaştı mı?
           if(this.activePin.body.velocity.y < 0 && this.activePin.y < this.targetContainer.y + targetRadius + 70) {
              this.handleImpact();
           }
@@ -250,11 +233,10 @@ const Game = () => {
         handleImpact() {
            let hitAngle = Phaser.Math.Angle.Normalize((Math.PI/2) - this.targetContainer.rotation);
            
-           // Diğer iğnelere çarptı mı?
            let collision = this.attachedPins.some(a => {
               let diff = Math.abs(a - hitAngle);
               if (diff > Math.PI) diff = (Math.PI*2) - diff;
-              return diff < 0.18; // Tolerans
+              return diff < 0.18; 
            });
 
            if (collision) this.doGameOver();
@@ -266,23 +248,20 @@ const Game = () => {
            this.attachedPins.push(angle);
            
            const targetRadius = this.targetCircle.displayWidth / 2;
-           const pinOffset = targetRadius + 70; // Saplanma derinliği
+           const pinOffset = targetRadius + 70; 
 
-           // Yeni saplanmış iğne oluştur
            const pin = this.add.sprite(Math.cos(angle)*pinOffset, Math.sin(angle)*pinOffset, 'pinTexture');
            pin.setRotation(angle + Math.PI/2).setTint(0xffffff);
            this.targetContainer.add(pin);
            
            this.cameras.main.shake(50, 0.005);
            
-           // Aktif iğneyi gizle
            this.activePin.setVisible(false);
            this.activePin.y = 2000;
            
            this.pinsLeftToStick--;
            this.pinsLeftText.setText(`PINS: ${this.pinsLeftToStick}`);
            
-           // LEVEL BİTTİ Mİ?
            if (this.pinsLeftToStick <= 0) {
               this.winLevel();
            } else {
@@ -294,17 +273,14 @@ const Game = () => {
            this.canShoot = false;
            soundManager.playWin();
            
-           // Partikül Efekti
            this.particleEmitter.explode(50, this.scale.width/2, this.scale.height*0.30);
 
-           // Level Geçiş Animasyonu (Küçül ve Yok Ol)
            this.tweens.add({ 
               targets: this.targetContainer, 
               scale: 0, 
               duration: 400, 
               ease: 'Back.in', 
               onComplete: () => { 
-                 // Animasyon bitince bir sonraki levele geç
                  this.startLevel(this.level + 1); 
               }
            });
@@ -328,7 +304,6 @@ const Game = () => {
         restartGame() { this.startLevel(1); }
       }
 
-      // Phaser Config
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO, 
         parent: 'game-container', 
@@ -341,7 +316,6 @@ const Game = () => {
       gameRef.current = new Phaser.Game(config);
     }
 
-    // Cleanup
     return () => { 
       if(gameRef.current) { 
         gameRef.current.destroy(true); 
@@ -352,7 +326,6 @@ const Game = () => {
 
   // --- HTML ARAYÜZLERİ ---
 
-  // 1. START SCREEN
   if (gameState === 'START') {
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center bg-black/90 z-50 font-[Orbitron] text-white p-4">
@@ -367,7 +340,6 @@ const Game = () => {
     );
   }
 
-  // 2. GAME OVER SCREEN
   if (gameState === 'GAMEOVER') {
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center bg-black/95 z-50 font-[Orbitron] text-white p-4 safe-area-padding">
