@@ -60,6 +60,8 @@ const Game = () => {
        try { if (sdk?.actions?.ready) sdk.actions.ready(); } catch (e) { console.error(e); }
     };
     initSDK();
+    // İlk açılışta leaderboard'u çek
+    fetchLeaderboard();
   }, []);
 
   const fetchLeaderboard = async () => {
@@ -79,7 +81,10 @@ const Game = () => {
       await fetch('/api/leaderboard', {
         method: 'POST', body: JSON.stringify({ name: playerName, score: score })
       });
+      // Skoru gönderdikten sonra listeyi güncelle
       fetchLeaderboard(); 
+      // İsim alanını temizle
+      setPlayerName("");
     } catch (e) { console.error(e); }
     setSubmitting(false);
   };
@@ -294,6 +299,7 @@ const Game = () => {
               localStorage.setItem("spinshot_highscore", this.level.toString());
            }
            
+           // Oyun bitince leaderboard'u güncelle
            fetchLeaderboard();
            setGameState('GAMEOVER');
         }
@@ -301,7 +307,6 @@ const Game = () => {
         restartGame() { this.startLevel(1); }
       }
 
-      // --- DÜZELTME 2: Gravity'ye X ekseni eklendi ---
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO, 
         parent: 'game-container', 
@@ -322,72 +327,84 @@ const Game = () => {
     };
   }, [gameState]); 
 
-  // --- HTML ARAYÜZLERİ ---
+  // --- HTML ARAYÜZLERİ (MOBİL UYUMLU & ORTALANMIŞ) ---
 
+  // 1. START SCREEN
   if (gameState === 'START') {
     return (
-      <div className="fixed inset-0 flex flex-col items-center justify-center bg-black/90 z-50 font-[Orbitron] text-white p-4">
-        <h1 className="text-5xl md:text-6xl font-bold mb-2 text-[#0052ff] drop-shadow-[0_0_20px_#0052ff] text-center">SPINSHOT</h1>
-        <p className="text-gray-400 mb-8 tracking-widest text-sm text-center">BASE EDITION</p>
-        <div className="text-xl mb-12 text-[#ff00ff]">BEST: {highScore}</div>
-        
-        <button onClick={startGame} className="w-64 py-5 bg-gradient-to-r from-[#0052ff] to-[#ff00ff] rounded-2xl text-3xl font-bold hover:scale-105 active:scale-95 transition shadow-lg shadow-blue-500/50 touch-manipulation">
-          PLAY
-        </button>
+      // `px-4` eklendi: Kenarlardan boşluk bırakır.
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-black/90 z-50 font-[Orbitron] text-white p-4 safe-area-padding">
+        <div className="w-full max-w-md flex flex-col items-center text-center">
+          <h1 className="text-5xl md:text-6xl font-bold mb-2 text-[#0052ff] drop-shadow-[0_0_20px_#0052ff]">SPINSHOT</h1>
+          <p className="text-gray-400 mb-8 tracking-widest text-sm">BASE EDITION</p>
+          <div className="text-xl mb-12 text-[#ff00ff]">BEST: {highScore}</div>
+          
+          <button onClick={startGame} className="w-64 py-5 bg-gradient-to-r from-[#0052ff] to-[#ff00ff] rounded-2xl text-3xl font-bold hover:scale-105 active:scale-95 transition shadow-lg shadow-blue-500/50 touch-manipulation">
+            PLAY
+          </button>
+        </div>
       </div>
     );
   }
 
+  // 2. GAME OVER SCREEN
   if (gameState === 'GAMEOVER') {
     return (
-      <div className="fixed inset-0 flex flex-col items-center justify-center bg-black/95 z-50 font-[Orbitron] text-white p-4 safe-area-padding">
-        <h2 className="text-4xl md:text-5xl font-bold text-[#ff0055] mb-2 drop-shadow-[0_0_15px_#ff0055]">GAME OVER</h2>
-        <p className="text-xl mb-6">LEVEL: <span className="text-yellow-400">{score}</span></p>
+      // `px-4` ve `text-center` eklendi/güçlendirildi.
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-black/95 z-50 font-[Orbitron] text-white p-4 safe-area-padding text-center">
+        <div className="w-full max-w-md flex flex-col items-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-[#ff0055] mb-2 drop-shadow-[0_0_15px_#ff0055]">GAME OVER</h2>
+          <p className="text-xl mb-6">LEVEL: <span className="text-yellow-400">{score}</span></p>
 
-        <div className="w-full max-w-sm bg-[#1a1a2e] border border-[#0052ff] rounded-xl p-4 mb-4 shadow-[0_0_20px_rgba(0,82,255,0.2)]">
-          <h3 className="text-lg text-[#0052ff] mb-2 text-center border-b border-gray-700 pb-2">TOP PLAYERS</h3>
-          <div className="space-y-2 mb-4 max-h-32 overflow-y-auto">
-            {leaderboard.map((player, i) => (
-               <div key={i} className="flex justify-between items-center bg-black/30 p-2 rounded text-sm">
-                 <span className="text-gray-300 truncate w-32">{i+1}. {player.name}</span>
-                 <span className="text-[#ff00ff] font-bold">{player.score}</span>
-               </div>
-            ))}
-            {leaderboard.length === 0 && <p className="text-center text-xs text-gray-500">No scores yet.</p>}
+          {/* Leaderboard Kutusu - Genişlik ve ortalama ayarlandı */}
+          <div className="w-full bg-[#1a1a2e] border border-[#0052ff] rounded-xl p-4 mb-4 shadow-[0_0_20px_rgba(0,82,255,0.2)]">
+            <h3 className="text-lg text-[#0052ff] mb-2 border-b border-gray-700 pb-2">TOP PLAYERS</h3>
+            <div className="space-y-2 mb-4 max-h-40 overflow-y-auto text-left">
+              {leaderboard.map((player, i) => (
+                <div key={i} className="flex justify-between items-center bg-black/30 p-2 rounded text-sm">
+                  <span className="text-gray-300 truncate">{i+1}. {player.name}</span>
+                  <span className="text-[#ff00ff] font-bold">{player.score}</span>
+                </div>
+              ))}
+              {leaderboard.length === 0 && <p className="text-center text-xs text-gray-500 py-4">No scores yet. Be the first!</p>}
+            </div>
+
+            {/* İsim Girme Alanı - Flex düzeni */}
+            <div className="flex gap-2">
+              <input 
+                type="text" 
+                placeholder="Your Name" 
+                maxLength={12}
+                value={playerName}
+                onChange={(e) => setPlayerName(e.target.value)}
+                // Input fontu mobilde zoom yapmaması için 16px (text-base) yapıldı
+                className="flex-1 bg-black/50 border border-gray-600 rounded px-3 py-3 text-base text-white focus:border-[#0052ff] outline-none"
+              />
+              <button 
+                onClick={submitScore}
+                disabled={submitting || !playerName}
+                className="bg-[#0052ff] px-6 rounded font-bold disabled:opacity-50 active:bg-blue-600 transition-colors"
+              >
+                {submitting ? '...' : 'SUBMIT'}
+              </button>
+            </div>
           </div>
 
-          <div className="flex gap-2">
-            <input 
-              type="text" 
-              placeholder="Your Name" 
-              maxLength={12}
-              value={playerName}
-              onChange={(e) => setPlayerName(e.target.value)}
-              className="flex-1 bg-black/50 border border-gray-600 rounded px-3 py-3 text-lg text-white focus:border-[#0052ff] outline-none"
-            />
+          {/* Butonlar */}
+          <div className="flex flex-col gap-3 w-full">
+            <button onClick={startGame} className="w-full py-4 bg-white text-black rounded-xl font-bold text-xl active:scale-95 transition">
+              TRY AGAIN
+            </button>
             <button 
-              onClick={submitScore}
-              disabled={submitting || !playerName}
-              className="bg-[#0052ff] px-4 rounded font-bold disabled:opacity-50 active:bg-blue-600"
+              onClick={() => {
+                  const url = `https://warpcast.com/~/compose?text=I%20reached%20Level%20${score}%20in%20Spinshot!%20%F0%9F%8E%AF%20Can%20you%20beat%20me?&embeds[]=https://spinshot.vercel.app`;
+                  window.open(url, '_blank');
+              }}
+              className="w-full py-4 bg-[#855DCD] rounded-xl font-bold text-xl active:scale-95 transition"
             >
-              {submitting ? '...' : 'OK'}
+              SHARE SCORE
             </button>
           </div>
-        </div>
-
-        <div className="flex flex-col gap-3 w-full max-w-sm">
-          <button onClick={startGame} className="w-full py-4 bg-white text-black rounded-xl font-bold text-xl active:scale-95 transition">
-            TRY AGAIN
-          </button>
-          <button 
-             onClick={() => {
-                const url = `https://warpcast.com/~/compose?text=I%20reached%20Level%20${score}%20in%20Spinshot!%20%F0%9F%8E%AF%20Can%20you%20beat%20me?&embeds[]=https://spinshot.vercel.app`;
-                window.open(url, '_blank');
-             }}
-             className="w-full py-4 bg-[#855DCD] rounded-xl font-bold text-xl active:scale-95 transition"
-          >
-            SHARE SCORE
-          </button>
         </div>
       </div>
     );
